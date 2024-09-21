@@ -23,12 +23,11 @@ jobs:
         cache: 'gradle'
 
     - name: Update APT repos
-      run: apt update
+      run: sudo apt update
 
     - name: Install APT dependencies
       run: |
-        apt -y install git-lfs
-        apt -y install ant apg dos2unix autoconf automake g++ libtool patch make cmake ninja-build swig tclsh python3-pip
+        sudo apt -y install git-lfs ant apg dos2unix autoconf automake g++ libtool patch make cmake ninja-build swig tclsh python3-pip
 
     - name: Install pip dependencies
       run: |
