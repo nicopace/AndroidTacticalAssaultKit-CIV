@@ -24,11 +24,6 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
 
-    #- name: Setup Android SDK
-    #  uses: android-actions/setup-android@v3
-    #  with:
-    #    cmdline-tools-version: 4333796
-    
     - name: Update APT repos
       run: sudo apt update
 
@@ -80,12 +75,19 @@ jobs:
        yes | android-sdk-linux/tools/bin/sdkmanager --licenses
        set -o pipefail
 
-    - uses: nttld/setup-ndk@v1
-      id: setup-ndk
+    - name: Cache Android NDK
+      uses: actions/cache@v3
       with:
-        ndk-version: 12b
-        link-to-sdk: true
-
+        path: android-ndk-r${{ env.NDK_VERSION }}
+        key: android-ndk-r${{ env.NDK_VERSION }}
+        
+    - name: Install Android NDK (if not cached)
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+       wget --quiet --tries=0 --output-document=android-ndk.zip https://dl.google.com/android/repository/android-ndk-r${NDK_VERSION}-linux-x86_64.zip;
+       unzip -qq android-ndk.zip;
+       echo "ANDROID_NDK_HOME=$PWD/android-ndk-r${NDK_VERSION}" >> $GITHUB_ENV
+       echo "ANDROID_NDK=$PWD/android-ndk-r${NDK_VERSION}" >> $GITHUB_ENV
 
     - name: Cache CMake
       uses: actions/cache@v3
