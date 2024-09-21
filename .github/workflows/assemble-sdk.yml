@@ -18,19 +18,27 @@ jobs:
       with:
         fetch-depth: 1
 
+    - name: Update APT repos
+      run: apt update
+
+    - name: Install APT dependencies
+      run: |
+        apt -y install git-lfs
+        apt -y install ant apg dos2unix autoconf automake g++ libtool patch make cmake ninja-build swig tclsh python3-pip
+
+    - name: Install pip dependencies
+      run: |
+        pip3 install -U pip setuptools
+        pip3 install conan==1.59.0
+
     - name: Checkout LFS objects
       run: |
-        apt update
-        apt -y install git-lfs
         git lfs install --local
         git lfs fetch
         git lfs checkout
 
     - name: set environment
       run: |
-        apt -y install ant apg dos2unix autoconf automake g++ libtool patch make cmake ninja-build swig tclsh python3-pip
-        pip3 install -U pip setuptools
-        pip3 install conan==1.59.0
         echo "ANDROID_COMPILE_SDK=29" >> $GITHUB_ENV
         echo "ANDROID_BUILD_TOOLS=29.0.3" >> $GITHUB_ENV
         echo "ANDROID_SDK_TOOLS=4333796" >> $GITHUB_ENV
