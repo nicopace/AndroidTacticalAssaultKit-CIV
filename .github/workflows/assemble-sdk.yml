@@ -55,8 +55,6 @@ jobs:
       uses: actions/cache@v3
       with:
         path: android-sdk-linux
-        key: android-sdk-linux-${{ runner.os }}-${{ hashFiles('**/sdk-tools-linux-*.zip') }}
-        restore-keys: android-sdk-linux
 
     - name: Install Android SDK (if not cached)
       if: steps.cache.outputs.cache-hit != 'true'
@@ -78,8 +76,6 @@ jobs:
       uses: actions/cache@v3
       with:
         path: android-ndk-r${{ env.NDK_VERSION }}
-        key: android-ndk-r${{ env.NDK_VERSION }}-${{ runner.os }}
-        restore-keys: android-ndk-r${{ env.NDK_VERSION }}
 
     - name: Install Android NDK (if not cached)
       if: steps.cache.outputs.cache-hit != 'true'
@@ -93,7 +89,6 @@ jobs:
       uses: actions/cache@v3
       with:
         path: cmake-3.14.7-Linux-x86_64
-        key: cmake-3.14.7-${{ runner.os }}
 
     - name: Install CMake (if not cached)
       if: steps.cache.outputs.cache-hit != 'true'
