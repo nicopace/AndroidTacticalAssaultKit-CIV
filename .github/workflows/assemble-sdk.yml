@@ -24,17 +24,11 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
-      with:
-        cmdline-tools-version: 4333796
-  
-    - uses: nttld/setup-ndk@v1
-      id: setup-ndk
-      with:
-        ndk-version: 12b
-        link-to-sdk: true
-
+    #- name: Setup Android SDK
+    #  uses: android-actions/setup-android@v3
+    #  with:
+    #    cmdline-tools-version: 4333796
+    
     - name: Update APT repos
       run: sudo apt update
 
@@ -73,9 +67,9 @@ jobs:
     - name: Install Android SDK (if not cached)
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
-       #wget --quiet --tries=0 --output-document=android-sdk.zip https://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_SDK_TOOLS}.zip;
-       #unzip -qq -d android-sdk-linux android-sdk.zip;
-       #mkdir -p ~/.android;
+       wget --quiet --tries=0 --output-document=android-sdk.zip https://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_SDK_TOOLS}.zip;
+       unzip -qq -d android-sdk-linux android-sdk.zip;
+       mkdir -p ~/.android;
        touch ~/.android/repositories.cfg;
        echo y | android-sdk-linux/tools/bin/sdkmanager "platforms;android-${ANDROID_COMPILE_SDK}" >/dev/null;
        echo y | android-sdk-linux/tools/bin/sdkmanager "platform-tools" >/dev/null;
@@ -85,6 +79,13 @@ jobs:
        set +o pipefail
        yes | android-sdk-linux/tools/bin/sdkmanager --licenses
        set -o pipefail
+
+    - uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: 12b
+        link-to-sdk: true
+
 
     - name: Cache CMake
       uses: actions/cache@v3
