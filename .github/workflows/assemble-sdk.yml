@@ -5,7 +5,7 @@ on:
 jobs:
   assemble:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     container:
       image: openjdk:8-jdk
     defaults:
@@ -27,20 +27,7 @@ jobs:
 
     - name: set environment
       run: |
-        apt -y install ant
-        apt -y install apg
-        apt -y install dos2unix
-        apt -y install autoconf
-        apt -y install automake
-        apt -y install g++
-        apt -y install libtool
-        apt -y install patch
-        apt -y install make
-        apt -y install cmake
-        apt -y install ninja-build
-        apt -y install swig
-        apt -y install tclsh
-        apt -y install python3-pip
+        apt -y install ant apg dos2unix autoconf automake g++ libtool patch make cmake ninja-build swig tclsh python3-pip unzip
         pip3 install -U pip setuptools
         pip3 install conan==1.59.0
         echo "ANDROID_COMPILE_SDK=29" >> $GITHUB_ENV
