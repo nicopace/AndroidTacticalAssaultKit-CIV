@@ -41,7 +41,7 @@ make -C ../takthirdparty \
 wait
 
 # find is faster and more precise than rm -rf
-find ~/.conan -mindepth 1 -delete
+rm -rf ~/.conan
 conan profile new default --detect
 # This step is required to ensure conan package IDs are consistent between prebuild and build steps
 conan profile update settings.compiler.version=8 default
