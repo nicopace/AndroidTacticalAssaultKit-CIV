@@ -1,4 +1,5 @@
 name: Assemble ATAK
+runs-on: self-hosted
 
 on:
   pull_request:
@@ -6,7 +7,8 @@ on:
 jobs:
   assemble:
     name: Build
-    runs-on: ubuntu-latest
+    #runs-on: ubuntu-latest
+    runs-on: self-hosted
     defaults:
       run:
         shell: bash
