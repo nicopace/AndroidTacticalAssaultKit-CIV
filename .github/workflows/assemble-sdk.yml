@@ -5,42 +5,23 @@ on:
 jobs:
   assemble:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     container:
       image: openjdk:8-jdk
     defaults:
       run:
         shell: bash
     steps:
-    - name: Checkout github repo
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 1
-    - name: Checkout LFS objects
+
+    - name: install packages
       run: |
         apt update
-        apt -y install git-lfs
-        git lfs install --local
-        git lfs fetch
-        git lfs checkout
-    - name: set environment
-      run: |
-        apt -y install ant
-        apt -y install apg
-        apt -y install dos2unix
-        apt -y install autoconf
-        apt -y install automake
-        apt -y install g++
-        apt -y install libtool
-        apt -y install patch
-        apt -y install make
-        apt -y install cmake
-        apt -y install ninja-build
-        apt -y install swig
-        apt -y install tclsh
-        apt -y install python3-pip
+        apt -y install ant apg dos2unix autoconf automake g++ libtool patch make cmake ninja-build swig tclsh python3-pip unzip git git-lfs
         pip3 install -U pip setuptools
         pip3 install conan==1.59.0
+        
+    - name: set environment
+      run: |
         echo "ANDROID_COMPILE_SDK=29" >> $GITHUB_ENV
         echo "ANDROID_BUILD_TOOLS=29.0.3" >> $GITHUB_ENV
         echo "ANDROID_SDK_TOOLS=4333796" >> $GITHUB_ENV
@@ -49,6 +30,19 @@ jobs:
         echo "KEYSTORE_STORE_PASSWORD=$(apg -a 1 -n 1 -m 16 -x 16 -E '\')" >> $GITHUB_ENV
         echo "KEYSTORE_KEY_PASSWORD=$(apg -a 1 -n 1 -m 16 -x 16 -E '\')" >> $GITHUB_ENV
         mkdir $HOME/secrets
+        
+    - name: Checkout github repo
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+        
+    - name: Checkout LFS objects
+      run: |
+        apt -y install 
+        git lfs install --local
+        git lfs fetch
+        git lfs checkout
+
     - name: set up Android SDK
       run: |
        wget --quiet --tries=0 --output-document=android-sdk.zip https://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_SDK_TOOLS}.zip;
@@ -63,12 +57,14 @@ jobs:
        set +o pipefail
        yes | android-sdk-linux/tools/bin/sdkmanager --licenses
        set -o pipefail
+
     - name: set up Android NDK
       run: |
        wget --quiet --tries=0 --output-document=android-ndk.zip https://dl.google.com/android/repository/android-ndk-r${NDK_VERSION}-linux-x86_64.zip;
        unzip -qq  android-ndk.zip;
        echo "ANDROID_NDK_HOME=$PWD/android-ndk-r${NDK_VERSION}" >> $GITHUB_ENV
        echo "ANDROID_NDK=$PWD/android-ndk-r${NDK_VERSION}" >> $GITHUB_ENV
+
     - name: set up CMake
       run: |
        wget --quiet --tries=0 --output-document=cmake-3.14.7.tar.gz https://cmake.org/files/v3.14/cmake-3.14.7-Linux-x86_64.tar.gz;
@@ -76,6 +72,7 @@ jobs:
        tar xf cmake-3.14.7.tar;
        rm -rf cmake-3.14.7.tar;
        echo "CMAKE_HOME=$PWD/cmake-3.14.7-Linux-x86_64" >> $GITHUB_ENV
+
     - name: Build Dependencies
       run: |
         git submodule update --init --recursive
@@ -92,6 +89,7 @@ jobs:
             (cd lib && (find . -maxdepth 1 -type f -not -name "*.so" -print0 | xargs -0 -I {} rm -f {})) ; \
             popd ; \
         done
+
     - name: Create Keystore
       run: |
         echo y | $JAVA_HOME/bin/keytool -genkeypair -dname "cn=ATAK CIV, ou=, o=, c=US" -alias $KEYSTORE_ALIAS -keypass $KEYSTORE_KEY_PASSWORD -keystore $HOME/secrets/android_keystore -storepass $KEYSTORE_STORE_PASSWORD -validity 10000
@@ -105,6 +103,7 @@ jobs:
         echo "takReleaseKeyFilePassword=$KEYSTORE_STORE_PASSWORD" >> local.properties
         echo "takReleaseKeyAlias=$KEYSTORE_ALIAS" >> local.properties
         echo "takReleaseKeyPassword=$KEYSTORE_KEY_PASSWORD" >> local.properties
+
     - name: Assemble ATAK APK
       run: |
         cd atak
@@ -113,6 +112,7 @@ jobs:
         rm -rf ATAK/app/build
         bash ./gradlew generateJniHeaders
         bash ./gradlew assembleCivSdk
+
     - name: generate ATAK CIV SDK package
       run: |
         rm -rf takthirdparty
@@ -142,8 +142,9 @@ jobs:
         cp ./build/libs/atak-gradle-takdev-*.jar ../pluginsdk/atak-gradle-takdev.jar
         popd
         mv pluginsdk atak-civ-sdk
+
     - name: Upload SDK build output
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4  # Updated from v2 to v4
       with:
         name: assembleCivSdk
         path: |
